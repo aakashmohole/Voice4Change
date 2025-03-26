@@ -1,0 +1,57 @@
+from django.db import models
+from django.contrib.auth.hashers import make_password, check_password
+from cloudinary.models import CloudinaryField
+# Create your models here.
+
+class UserAccount(models.Model):
+    class Role(models.TextChoices):
+        CIVILIAN = 'CIVILIAN', 'Civilian'
+        ADMIN = 'ADMIN', 'Village Authority Admin'
+    
+    class DocumentType(models.TextChoices):
+        AADHAAR = 'AADHAAR', 'Aadhaar Card'
+        VOTER_ID = 'VOTER_ID', 'Voter ID'
+        PAN = 'PAN', 'PAN Card'
+        DRIVING_LICENSE = 'DRIVING_LICENSE', 'Driving License'
+        PASSPORT = 'PASSPORT', 'Passport'
+        RATION_CARD = 'RATION_CARD', 'Ration Card'
+        OTHER = 'OTHER', 'Other'
+        
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=15)
+    address =  models.TextField()
+    password = models.CharField(max_length=128)
+    role = models.CharField(max_length=20, choices=Role.choices)
+    registration_step = models.PositiveSmallIntegerField(default=1)
+    is_active = models.BooleanField(default=False)
+    
+    
+    # Document fields
+    id_proof_type = models.CharField(max_length=20, choices=DocumentType.choices)
+    id_proof_file = CloudinaryField('id_proofs', folder='authentication/id_proofs')
+   
+    
+    
+    # Authority-specific fields
+    authority_position = models.CharField(max_length=100, blank=True)
+    government_id = models.CharField(max_length=150, blank=True)
+    department_name = models.CharField(max_length=150)
+    work_location = models.CharField(max_length=150)
+    
+    
+    # Civilian-specific fields
+    occupation = models.CharField(max_length=100, blank=True)
+    family_members = models.PositiveIntegerField(null=True, blank=True)
+    
+    
+
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
+
+    def __str__(self):
+        return self.email
