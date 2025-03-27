@@ -1,0 +1,40 @@
+### Register a New User
+POST http://127.0.0.1:8000/api/register/ 
+Content-Type: application/json
+
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john.doe@example.com",
+  "phone": "1234567890",
+  "address": "123 Street, City",
+  "password": "password123",
+  "role": "CIVILIAN",
+  "id_proof_type": "AADHAAR",
+  "id_proof_file": "",
+  "authority_position": "",
+  "government_id": "",
+  "department_name": "",
+  "work_location": "",
+  "occupation": "Engineer",
+  "family_members": 4
+}
+
+### Login and Get JWT Token
+POST http://127.0.0.1:8000/api/auth/login/
+Content-Type: application/json
+
+{
+    "email": "akash.sharma@example.com",
+    "password": "StrongPass@123"
+}
+
+
+### Check User Profile (Make sure to include Cookie from Login response)
+GET http://127.0.0.1:8000/api/auth/profile/
+Content-Type: application/json
+
+### Logout User
+POST http://127.0.0.1:8000/api/logout/
+Content-Type: application/json
+Cookie: access=YOUR_ACCESS_TOKEN_HERE  # Replace with actual token

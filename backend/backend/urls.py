@@ -18,6 +18,10 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # Authentication endpoints
     path('api/auth/', include('authentication.urls')),
+    
+    # Feedback endpoints
+    path('api/feedback/', include('feedback.urls')),
+    
 ]

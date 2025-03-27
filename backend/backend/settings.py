@@ -62,7 +62,7 @@ cloudinary.config(
 )
 
 
-
+AUTH_USER_MODEL = "authentication.UserAccount"
 ALLOWED_HOSTS = ['*']
 
 
@@ -78,7 +78,7 @@ INSTALLED_APPS = [
     
     # app modules
     'authentication',
-    
+    'feedback',
     
     # third party     
     'rest_framework',
@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'cloudinary_storage',
     
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -175,25 +176,13 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-}
-
-# Simple JWT settings
-from datetime import timedelta
-
-from datetime import timedelta
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
     
-    # Cookie settings
-    'AUTH_COOKIE': 'access_token',  # Cookie name for access token
-    'AUTH_COOKIE_DOMAIN': None,     # Set to your domain if using cross-domain cookies
-    'AUTH_COOKIE_SECURE': False,    # Set to True in production (HTTPS only)
-    'AUTH_COOKIE_HTTP_ONLY': True,  # HTTP-only flag
-    'AUTH_COOKIE_PATH': '/',        # Path where cookie is valid
-    'AUTH_COOKIE_SAMESITE': 'Lax',  # Strict/Lax/None for CSRF protection
-    'AUTH_COOKIE_REFRESH': 'refresh_token',  # Cookie name for refresh token
+}
+SIMPLE_JWT = {
+    "AUTH_COOKIE": "access_token",  # Name of access token cookie
+    "AUTH_COOKIE_REFRESH": "refresh_token",  # Name of refresh token cookie
+    "AUTH_COOKIE_SECURE": False,  # Change to True in production (HTTPS required)
+    "AUTH_COOKIE_HTTP_ONLY": True,  # Prevent JavaScript access (security measure)
+    "AUTH_COOKIE_PATH": "/",  # Ensure it's available for all routes
+    "AUTH_COOKIE_SAMESITE": "Lax",  # Adjust based on frontend/backend setup
 }

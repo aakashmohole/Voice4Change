@@ -49,7 +49,6 @@ class Feedback(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_anonymous = models.BooleanField(default=False)
     sentiment_score = models.FloatField(null=True, blank=True)
-    themes = models.JSONField(default=list, blank=True)
     
      # Add these new fields
     keywords = models.CharField(max_length=255, blank=True)  # For optimized searching
@@ -58,6 +57,7 @@ class Feedback(models.Model):
         choices=[('LOW', 'Low'), ('MEDIUM', 'Medium'), ('HIGH', 'High')],
         default='MEDIUM'
     )
+    
     upvotes = models.PositiveIntegerField(default=0)
     downvotes = models.PositiveIntegerField(default=0)
     
