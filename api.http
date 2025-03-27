@@ -36,5 +36,4 @@ Content-Type: application/json
 
 ### Logout User
 POST http://127.0.0.1:8000/api/logout/
-Content-Type: application/json
-Cookie: access=YOUR_ACCESS_TOKEN_HERE  # Replace with actual token
+

@@ -33,28 +33,6 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]
 
-# class LoginView(APIView):
-#     permission_classes = [AllowAny]
-
-#     def post(self, request):
-#         serializer = UserLoginSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-
-#         email = serializer.validated_data['email']
-#         password = serializer.validated_data['password']
-
-#         try:
-#             user = UserAccount.objects.get(email=email)
-#             if not user.check_password(password):
-#                 return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-#         except UserAccount.DoesNotExist:
-#             return Response({"detail": "User not found"}, status=status.HTTP_401_UNAUTHORIZED)
-
-#         refresh = RefreshToken.for_user(user)
-#         response = Response({"detail": "Login successful"}, status=status.HTTP_200_OK)
-#         print(str(refresh.access_token))
-#         set_auth_cookie(response, str(refresh.access_token), str(refresh))
-#         return response
 
 
 class LoginView(APIView):
@@ -84,16 +62,29 @@ class LoginView(APIView):
 
         return response
 
+
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        response = Response({"detail": "Logged out"}, status=status.HTTP_200_OK)
-        response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'])
-        response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
-        return response
+        try:
+            # Get the refresh token from cookies
+            refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
 
+            if refresh_token:
+                # Blacklist the refresh token to prevent reuse
+                token = RefreshToken(refresh_token)
+                token.blacklist()
 
+            # Clear authentication cookies
+            response = Response({"detail": "Logged out"}, status=status.HTTP_200_OK)
+            response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'])
+            response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
+
+            return response
+
+        except Exception as e:
+            return Response({"detail": "Logout failed", "error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [CookieJWTAuthentication]  # Use cookie-based authentication
