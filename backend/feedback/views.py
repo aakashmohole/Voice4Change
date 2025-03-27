@@ -39,8 +39,8 @@ class FeedbackUpdateView(generics.UpdateAPIView):
 
 class FeedbackDeleteView(generics.DestroyAPIView):
     queryset = Feedback.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
-
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [CookieJWTAuthentication]
     def get_queryset(self):
         return Feedback.objects.filter(user=self.request.user)
 
