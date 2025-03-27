@@ -5,6 +5,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
 from .models import UserAccount
+import json
+from .backend import CookieJWTAuthentication
 from .serializers import (
     Step1RegistrationSerializer,
     CivilianStep2Serializer,
@@ -46,23 +48,42 @@ class SetJWTCookieMixin:
 class CustomTokenObtainPairView(SetJWTCookieMixin, TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        
+        if response.status_code == 200 and 'user' in response.data:
+            user_data = response.data['user']
+            response.set_cookie(
+                'user_data',
+                value=json.dumps(user_data),
+                httponly=True,
+                secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+                max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
+            )
+        return response
+    
 class CustomTokenRefreshView(SetJWTCookieMixin, TokenRefreshView):
     pass
 
 class LogoutView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated,)
-
     def post(self, request):
-        response = Response({'detail': 'Successfully logged out.'}, status=status.HTTP_200_OK)
+        response = Response(
+            {'detail': 'Successfully logged out.'},
+            status=status.HTTP_200_OK
+        )
         
-        # Clear access token cookie
-        response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'])
+        cookies_to_clear = [
+            settings.SIMPLE_JWT['AUTH_COOKIE'],
+            'refresh_token',
+            'user_data'
+        ]
         
-        # Clear refresh token cookie
-        response.delete_cookie('refresh_token')
+        for cookie in cookies_to_clear:
+            response.delete_cookie(cookie)
         
         return response
-
+    
 class Step1RegistrationView(generics.CreateAPIView):
     serializer_class = Step1RegistrationSerializer
     permission_classes = (AllowAny,)
@@ -82,7 +103,6 @@ class Step2RegistrationView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
     queryset = UserAccount.objects.all()
     lookup_field = 'pk'
-    lookup_url_kwarg = 'pk'
 
     def get_serializer_class(self):
         user = self.get_object()
@@ -91,46 +111,27 @@ class Step2RegistrationView(generics.GenericAPIView):
         return AuthorityStep2Serializer
 
     def patch(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            
-            if instance.registration_step != 1:
-                return Response(
-                    {'error': 'Invalid registration step'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            # Handle file parsing differently for Cloudinary
-            data = request.data.dict() if hasattr(request.data, 'dict') else request.data
-            if 'id_proof[document_file]' in request.FILES:
-                data['id_proof'] = {
-                    'document_type': data.get('id_proof[document_type]'),
-                    'document_file': request.FILES['id_proof[document_file]']
-                }
-            
-            serializer_class = self.get_serializer_class()
-            serializer = serializer_class(instance, data=data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            
-            user = serializer.save()
-            # ... rest of your view code ...
-            
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        instance = self.get_object()
+        data = request.data.dict() if hasattr(request.data, 'dict') else request.data
         
-        # Generate tokens for automatic login
+        if 'id_proof[document_file]' in request.FILES:
+            data['id_proof'] = {
+                'document_type': data.get('id_proof[document_type]'),
+                'document_file': request.FILES['id_proof[document_file]']
+            }
+            
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(instance, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        
+        user = serializer.save()
         refresh = RefreshToken.for_user(user)
-        response_data = {
+        
+        response = Response({
             'user': UserAccountSerializer(user).data,
             'message': 'Registration completed successfully!'
-        }
+        }, status=status.HTTP_200_OK)
         
-        response = Response(response_data, status=status.HTTP_200_OK)
-        
-        # Set cookies
         response.set_cookie(
             key=settings.SIMPLE_JWT['AUTH_COOKIE'],
             value=str(refresh.access_token),
@@ -153,17 +154,29 @@ class Step2RegistrationView(generics.GenericAPIView):
         return response
 
 class UserProfileView(generics.RetrieveAPIView):
-    permission_classes = (IsAuthenticated,)
     serializer_class = UserAccountSerializer
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
+
+    def get(self, request, *args, **kwargs):
+        if 'user_data' in request.COOKIES:
+            try:
+                return Response(json.loads(request.COOKIES['user_data']))
+            except (json.JSONDecodeError, KeyError):
+                pass
+        
+        user = self.get_object()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
 
 class CheckRegistrationStepView(generics.RetrieveAPIView):
     permission_classes = (AllowAny,)
     queryset = UserAccount.objects.all()
     serializer_class = UserAccountSerializer
-    lookup_field = 'id'
+    lookup_field = 'pk'
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

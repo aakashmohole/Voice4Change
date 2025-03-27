@@ -31,15 +31,37 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG') == 'True'
 
+# Cloudinary Configuration
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+    'SECURE': True,
+    'MEDIA_TAG': 'authentication',
+    'STATICFILES_MIMETYPES': {
+        'svg': 'image/svg+xml',
+        'png': 'image/png',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'pdf': 'application/pdf'
+    }
+}
 
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+print(CLOUDINARY_STORAGE['CLOUD_NAME'])
+print(CLOUDINARY_STORAGE['API_KEY'])
 
 # Cloudinary Config
 cloudinary.config(
     cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    
     api_key=os.getenv('CLOUDINARY_API_KEY'),
     api_secret=os.getenv('CLOUDINARY_API_SECRET'),
     secure=True
 )
+
+
 
 ALLOWED_HOSTS = ['*']
 
@@ -158,12 +180,20 @@ REST_FRAMEWORK = {
 # Simple JWT settings
 from datetime import timedelta
 
+from datetime import timedelta
+
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),  # Access token validity
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),   # Refresh token validity
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    
+    # Cookie settings
+    'AUTH_COOKIE': 'access_token',  # Cookie name for access token
+    'AUTH_COOKIE_DOMAIN': None,     # Set to your domain if using cross-domain cookies
+    'AUTH_COOKIE_SECURE': False,    # Set to True in production (HTTPS only)
+    'AUTH_COOKIE_HTTP_ONLY': True,  # HTTP-only flag
+    'AUTH_COOKIE_PATH': '/',        # Path where cookie is valid
+    'AUTH_COOKIE_SAMESITE': 'Lax',  # Strict/Lax/None for CSRF protection
+    'AUTH_COOKIE_REFRESH': 'refresh_token',  # Cookie name for refresh token
 }
-
-# File storage settings
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
