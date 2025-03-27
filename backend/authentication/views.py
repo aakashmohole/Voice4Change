@@ -34,7 +34,6 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 
-
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -62,29 +61,31 @@ class LoginView(APIView):
 
         return response
 
-
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
-
+    authentication_classes = [CookieJWTAuthentication]
     def post(self, request):
-        try:
-            # Get the refresh token from cookies
-            refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
+        # Get the refresh token from cookies
+        refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
 
-            if refresh_token:
+        if refresh_token:
+            try:
                 # Blacklist the refresh token to prevent reuse
                 token = RefreshToken(refresh_token)
                 token.blacklist()
+            except Exception as e:
+                return Response(
+                    {"detail": "Invalid or expired refresh token", "error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-            # Clear authentication cookies
-            response = Response({"detail": "Logged out"}, status=status.HTTP_200_OK)
-            response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'])
-            response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
+        # Clear authentication cookies
+        response = Response({"detail": "Logged out"}, status=status.HTTP_200_OK)
+        response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'])
+        response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
 
-            return response
-
-        except Exception as e:
-            return Response({"detail": "Logout failed", "error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return response
+    
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [CookieJWTAuthentication]  # Use cookie-based authentication

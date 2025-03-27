@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     # third party     
     'rest_framework',
     'rest_framework_simplejwt',
+    "rest_framework_simplejwt.token_blacklist",
     
     'cloudinary',
     'cloudinary_storage',
@@ -178,11 +179,26 @@ REST_FRAMEWORK = {
     ],
     
 }
+# SIMPLE_JWT = {
+#     "AUTH_COOKIE": "access_token",  # Name of access token cookie
+#     "AUTH_COOKIE_REFRESH": "refresh_token",  # Name of refresh token cookie
+#     "AUTH_COOKIE_SECURE": False,  # Change to True in production (HTTPS required)
+#     "AUTH_COOKIE_HTTP_ONLY": True,  # Prevent JavaScript access (security measure)
+#     "AUTH_COOKIE_PATH": "/",  # Ensure it's available for all routes
+#     "AUTH_COOKIE_SAMESITE": "Lax",  # Adjust based on frontend/backend setup
+# }
+
+from datetime import timedelta
+
+# settings.py
 SIMPLE_JWT = {
-    "AUTH_COOKIE": "access_token",  # Name of access token cookie
-    "AUTH_COOKIE_REFRESH": "refresh_token",  # Name of refresh token cookie
-    "AUTH_COOKIE_SECURE": False,  # Change to True in production (HTTPS required)
-    "AUTH_COOKIE_HTTP_ONLY": True,  # Prevent JavaScript access (security measure)
-    "AUTH_COOKIE_PATH": "/",  # Ensure it's available for all routes
-    "AUTH_COOKIE_SAMESITE": "Lax",  # Adjust based on frontend/backend setup
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,  # Ensure blacklisting is enabled
+    "AUTH_COOKIE": "access_token",
+    "AUTH_COOKIE_REFRESH": "refresh_token",
+    "AUTH_COOKIE_SECURE": False,  # Set to True in production
+    "AUTH_COOKIE_HTTP_ONLY": True,
+    "AUTH_COOKIE_SAMESITE": "Lax",
 }

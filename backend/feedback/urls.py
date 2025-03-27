@@ -4,7 +4,8 @@ from .views import (
     FeedbackListView,
     FeedbackDetailView,
     FeedbackUpdateView,
-    FeedbackDeleteView
+    FeedbackDeleteView,
+    AdminFeedbackView
 )
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path('<int:pk>/', FeedbackDetailView.as_view(), name='view-feedback'),
     path('update/<int:pk>/', FeedbackUpdateView.as_view(), name='update-feedback'),
     path('delete/<int:pk>/', FeedbackDeleteView.as_view(), name='delete-feedback'),
+     path('admin/', AdminFeedbackView.as_view(), name='admin-feedback'),
 ]

@@ -8,7 +8,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 class FeedbackCreateView(generics.CreateAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
-    permission_classes = []
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -42,3 +43,17 @@ class FeedbackDeleteView(generics.DestroyAPIView):
 
     def get_queryset(self):
         return Feedback.objects.filter(user=self.request.user)
+
+class AdminFeedbackView(generics.ListAPIView):
+    serializer_class = FeedbackSerializer
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user  # Get logged-in user
+
+        # Ensure the user is an admin
+        if user.role == 'ADMIN':
+            return Feedback.objects.filter(location=user.location)
+        else:
+            return Feedback.objects.none()  # Return empty queryset if not admin
