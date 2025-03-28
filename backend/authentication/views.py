@@ -9,6 +9,10 @@ from .models import UserAccount
 from .serializers import UserRegisterSerializer, UserLoginSerializer, UserProfileSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from authentication.utils import CookieJWTAuthentication
+from rest_framework.throttling import ScopedRateThrottle
+
+
+
 
 def set_auth_cookie(response, token, refresh_token=None):
     response.set_cookie(
@@ -29,13 +33,19 @@ def set_auth_cookie(response, token, refresh_token=None):
             path='/'
         )
 
+
 class RegisterView(generics.CreateAPIView):
+    
     serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]
-
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'custom_scope'
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'custom_scope'
+    
 
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
@@ -91,6 +101,7 @@ class UserProfileView(APIView):
     authentication_classes = [CookieJWTAuthentication]  # Use cookie-based authentication
 
     def get(self, request):
+        
         user = request.user  # User is set after successful authentication
         serializer = UserProfileSerializer(user)
         return Response(serializer.data)

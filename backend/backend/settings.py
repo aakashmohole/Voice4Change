@@ -80,15 +80,17 @@ INSTALLED_APPS = [
     'authentication',
     'feedback',
     
+    
     # third party     
     'rest_framework',
     'rest_framework_simplejwt',
     "rest_framework_simplejwt.token_blacklist",
-    
+    'drf_yasg',
     'cloudinary',
     'cloudinary_storage',
     
     'django_filters',
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -177,16 +179,17 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+     'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '100/day',  # Authenticated users: 100 requests per day
+        'anon': '10/minute',  # Anonymous users: 10 requests per minute
+        'custom_scope': '5/minute',
+    }
     
 }
-# SIMPLE_JWT = {
-#     "AUTH_COOKIE": "access_token",  # Name of access token cookie
-#     "AUTH_COOKIE_REFRESH": "refresh_token",  # Name of refresh token cookie
-#     "AUTH_COOKIE_SECURE": False,  # Change to True in production (HTTPS required)
-#     "AUTH_COOKIE_HTTP_ONLY": True,  # Prevent JavaScript access (security measure)
-#     "AUTH_COOKIE_PATH": "/",  # Ensure it's available for all routes
-#     "AUTH_COOKIE_SAMESITE": "Lax",  # Adjust based on frontend/backend setup
-# }
 
 from datetime import timedelta
 
@@ -202,3 +205,12 @@ SIMPLE_JWT = {
     "AUTH_COOKIE_HTTP_ONLY": True,
     "AUTH_COOKIE_SAMESITE": "Lax",
 }
+
+
+
+# If you want to allow all origins (Not recommended for production)
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+
+
