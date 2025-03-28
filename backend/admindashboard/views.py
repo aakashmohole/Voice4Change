@@ -9,13 +9,13 @@ from django.http import HttpResponse
 import csv
 
 class AdminDashboardView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     authentication_classes = [CookieJWTAuthentication]
 
     def get(self, request):
         today = now()
         total_feedback = Feedback.objects.count()
-        resolved_feedback = Feedback.objects.filter(is_resolved=True).count()
+        resolved_feedback = Feedback.objects.filter(status="resolved").count()
         category_stats = Feedback.objects.values("category").annotate(total=Count("id"))
 
         last_7_days = Feedback.objects.filter(created_at__gte=today - timedelta(days=7)).count()
@@ -25,7 +25,7 @@ class AdminDashboardView(APIView):
         top_priority_issues = (
             Feedback.objects.filter(urgency__gte=7)
             .values("category", "title", "urgency")
-            .order_by("-urgency")[:5]
+            .order_by("urgency")[:5]
         )
 
         return Response({
