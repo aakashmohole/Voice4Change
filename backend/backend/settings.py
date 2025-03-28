@@ -80,7 +80,7 @@ INSTALLED_APPS = [
     'authentication',
     'feedback',
     'votes',
-    
+    'admindashboard', 
     
     # third party     
     'rest_framework',
