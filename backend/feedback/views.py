@@ -26,11 +26,7 @@ class FeedbackListView(generics.ListAPIView):
     filterset_class = FeedbackFilter
     search_fields = ['title', 'description', 'category', 'location']
     ordering_fields = ['created_at', 'upvotes', 'urgency']
-
-class FeedbackDetailView(generics.RetrieveAPIView):
-    queryset = Feedback.objects.all()
-    serializer_class = FeedbackSerializer
-    permission_classes = [permissions.AllowAny]
+    
     
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
@@ -42,6 +38,22 @@ class FeedbackDetailView(generics.RetrieveAPIView):
             feedback['description'] = translator.translate(feedback['description'], dest=language).text
         
         return response
+
+class FeedbackDetailView(generics.RetrieveAPIView):
+    queryset = Feedback.objects.all()
+    serializer_class = FeedbackSerializer
+    permission_classes = [permissions.AllowAny]
+    
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
+        language = request.GET.get('lang', 'en')
+        translator = Translator()
+
+        response.data['title'] = translator.translate(response.data['title'], dest=language).text
+        response.data['description'] = translator.translate(response.data['description'], dest=language).text
+
+        return response
+    
 class FeedbackUpdateView(generics.UpdateAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackUpdateSerializer
