@@ -9,6 +9,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from googletrans import Translator
 import google.generativeai as genai
 import re
+from rest_framework.exceptions import PermissionDenied
+
+
 
 # Configure Gemini API
 genai.configure(api_key=settings.GEMINI_API_KEY)
@@ -25,9 +28,14 @@ class FeedbackCreateView(generics.CreateAPIView):
 
         # Get sentiment score
         sentiment_score = self.get_sentiment_score(description)
+        print(f"User: {self.request.user}")  # Debugging
+        print(f"Is Authenticated: {self.request.user.is_authenticated}")  # Debugging
 
+        if not self.request.user or self.request.user.is_anonymous:
+            raise PermissionDenied("Authentication required to submit feedback.")
         # Save feedback with sentiment score
         serializer.save(user=self.request.user, sentiment_score=sentiment_score)
+
 
     def get_sentiment_score(self, text):
         """Analyze sentiment score using the free Gemini model"""

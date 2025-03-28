@@ -206,6 +206,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,  # Ensure blacklisting is enabled
     "AUTH_COOKIE": "access_token",
     "AUTH_COOKIE_REFRESH": "refresh_token",
+    "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_COOKIE_SECURE": False,  # Set to True in production
     "AUTH_COOKIE_HTTP_ONLY": True,
     "AUTH_COOKIE_SAMESITE": "Lax",
