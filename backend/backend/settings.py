@@ -189,7 +189,10 @@ REST_FRAMEWORK = {
         'user': '100/day',  # Authenticated users: 100 requests per day
         'anon': '10/minute',  # Anonymous users: 10 requests per minute
         'custom_scope': '5/minute',
-    }
+    },
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
     
 }
 

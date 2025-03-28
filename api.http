@@ -23,7 +23,7 @@ Content-Type: application/json
 ### Login and Get JWT Token
 POST http://127.0.0.1:8000/api/auth/login/
 Content-Type: application/json
-
+  
 {
     "email": "akash.sharma@example.com",
     "password": "StrongPass@123"

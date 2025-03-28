@@ -78,7 +78,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from django.contrib.auth import authenticate
 from django.conf import settings
 
@@ -115,6 +114,7 @@ class LoginView(APIView):
         response = Response(
             {
                 "detail": "Login successful",
+                "user_data" :user,
                 "access_token": access_token,
                 "refresh_token": refresh_token
             },
