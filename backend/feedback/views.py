@@ -5,6 +5,10 @@ from .serializers import FeedbackSerializer, FeedbackUpdateSerializer
 from .filters import FeedbackFilter
 from authentication.utils import CookieJWTAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from googletrans import Translator
+
+
+
 class FeedbackCreateView(generics.CreateAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
@@ -27,7 +31,17 @@ class FeedbackDetailView(generics.RetrieveAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
     permission_classes = [permissions.AllowAny]
+    
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        language = request.GET.get('lang', 'en')
+        translator = Translator()
 
+        for feedback in response.data:
+            feedback['title'] = translator.translate(feedback['title'], dest=language).text
+            feedback['description'] = translator.translate(feedback['description'], dest=language).text
+        
+        return response
 class FeedbackUpdateView(generics.UpdateAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackUpdateSerializer
