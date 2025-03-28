@@ -10,6 +10,9 @@ from googletrans import Translator
 import google.generativeai as genai
 import re
 from rest_framework.exceptions import PermissionDenied
+from datetime import timedelta  # For time-based filtering
+from difflib import SequenceMatcher  # For checking text similarity
+from django.utils.timezone import now  # To get the current timestamp
 
 
 
@@ -23,11 +26,29 @@ class FeedbackCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        user = self.request.user
         feedback = serializer.validated_data
         description = feedback.get("description", "")
 
         # Get sentiment score
         sentiment_score = self.get_sentiment_score(description)
+        
+         # Check if the user is sending too many feedbacks
+        recent_feedbacks = Feedback.objects.filter(
+            user=user,
+            created_at__gte=now() - timedelta(hours=1)  # Last 1 hour
+        )
+
+        if recent_feedbacks.count() >= 5:  # More than 5 complaints in 1 hour
+            raise PermissionDenied("Too many feedback submissions. Try again later.")
+
+        # Check if the feedback is very similar to previous submissions
+        for fb in recent_feedbacks:
+            similarity = SequenceMatcher(None, fb.description.lower(), description.lower()).ratio()
+            if similarity > 0.8:  # More than 80% similarity
+                raise PermissionDenied("Duplicate or similar feedback detected!")
+        
+        
         print(f"User: {self.request.user}")  # Debugging
         print(f"Is Authenticated: {self.request.user.is_authenticated}")  # Debugging
 
