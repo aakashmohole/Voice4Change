@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from authentication.models import UserAccount
-
+from cloudinary.models import CloudinaryField
 # Create your models here.
 
 class Feedback(models.Model):
@@ -49,7 +49,7 @@ class Feedback(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_anonymous = models.BooleanField(default=False)
     sentiment_score = models.FloatField(null=True, blank=True)
-    
+    image = CloudinaryField('feedbackimage', folder='feedback/images', blank=True)
      # Add these new fields
     keywords = models.CharField(max_length=255, blank=True)  # For optimized searching
     urgency = models.CharField(

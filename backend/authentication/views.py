@@ -10,7 +10,8 @@ from .serializers import UserRegisterSerializer, UserLoginSerializer, UserProfil
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from authentication.utils import CookieJWTAuthentication
 from rest_framework.throttling import ScopedRateThrottle
-
+from feedback.models import Feedback
+from feedback.serializers import FeedbackSerializer
 
 
 
@@ -72,15 +73,6 @@ class RegisterView(generics.CreateAPIView):
 #         return response
 
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from rest_framework.throttling import ScopedRateThrottle
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
-from django.conf import settings
-
 class LoginView(APIView):
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
@@ -111,6 +103,10 @@ class LoginView(APIView):
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
         
+        # Get user's feedback
+        feedbacks = Feedback.objects.filter(user=user)
+        feedback_data = FeedbackSerializer(feedbacks, many=True).data
+        
          # Prepare user data for response
         user_data = {
 
@@ -119,7 +115,8 @@ class LoginView(APIView):
             "email": user.email,
             "phone_number": user.phone,
             "address": user.address,
-            "user_type": user.role
+            "user_type": user.role,
+            "feedbacks": feedback_data, 
         }
 
         response = Response(
