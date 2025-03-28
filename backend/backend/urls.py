@@ -40,7 +40,7 @@ urlpatterns = [
     
     path('api/vote/', include('votes.urls')),
     
-    path("api/dashboard/", include("dashboard.urls")),     
+    path("api/dashboard/", include("admindashboard.urls")),     
     
      
     # endpoint documentation
