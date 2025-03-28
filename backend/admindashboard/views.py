@@ -1,14 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from django.utils.timezone import now, timedelta
 from django.db.models import Count
 from feedback.models import Feedback
+from authentication.utils import CookieJWTAuthentication
 from django.http import HttpResponse
 import csv
 
 class AdminDashboardView(APIView):
     permission_classes = [IsAdminUser]
+    authentication_classes = [CookieJWTAuthentication]
 
     def get(self, request):
         today = now()
@@ -40,7 +42,7 @@ class AdminDashboardView(APIView):
 
 class AssignFeedbackView(APIView):
     permission_classes = [IsAdminUser]
-
+    authentication_classes = [CookieJWTAuthentication]
     def post(self, request, feedback_id):
         try:
             feedback = Feedback.objects.get(id=feedback_id)
@@ -57,7 +59,9 @@ class AssignFeedbackView(APIView):
 
 class ExportFeedbackView(APIView):
     permission_classes = [IsAdminUser]
-
+    authentication_classes = [CookieJWTAuthentication]
+    
+    
     def get(self, request):
         category_filter = request.GET.get("category", None)
         feedbacks = Feedback.objects.all()
