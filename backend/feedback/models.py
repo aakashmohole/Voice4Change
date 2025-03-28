@@ -61,6 +61,18 @@ class Feedback(models.Model):
     upvotes = models.PositiveIntegerField(default=0)
     downvotes = models.PositiveIntegerField(default=0)
     
+    trending = models.BooleanField(default=False)  # New field to mark trending feedback
+
+    def update_upvotes(self):
+        """Update the upvote count dynamically."""
+        self.upvotes = self.upvotes_list.count()
+        self.save()
+    
+    def update_downvotes(self):
+        """Update the downvote count dynamically."""
+        self.downvotes = self.downvotes_list.count()
+        self.save() 
+        
     def save(self, *args, **kwargs):
         # Auto-generate keywords for better search
         self.keywords = ' '.join([

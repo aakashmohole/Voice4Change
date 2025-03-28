@@ -41,35 +41,103 @@ class RegisterView(generics.CreateAPIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'custom_scope'
 
+# class LoginView(APIView):
+#     permission_classes = [AllowAny]
+#     throttle_classes = [ScopedRateThrottle]
+#     throttle_scope = 'custom_scope'
+    
+
+#     def post(self, request):
+#         serializer = UserLoginSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+
+#         email = serializer.validated_data['email']
+#         password = serializer.validated_data['password']
+
+#         try:
+#             user = UserAccount.objects.get(email=email)
+#             if not user.check_password(password):
+#                 return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+#         except UserAccount.DoesNotExist:
+#             return Response({"detail": "User not found"}, status=status.HTTP_401_UNAUTHORIZED)
+
+#         refresh = RefreshToken.for_user(user)
+#         access_token = str(refresh.access_token)
+
+#         response = Response({"detail": "Login successful"}, status=status.HTTP_200_OK)
+        
+#         # Store tokens in cookies
+#         set_auth_cookie(response, access_token, str(refresh))
+
+#         return response
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from rest_framework.throttling import ScopedRateThrottle
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from django.contrib.auth import authenticate
+from django.conf import settings
+
 class LoginView(APIView):
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
-    throttle_scope = 'custom_scope'
-    
+    throttle_scope = "custom_scope"
 
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        email = serializer.validated_data['email']
-        password = serializer.validated_data['password']
+        email = serializer.validated_data["email"]
+        password = serializer.validated_data["password"]
 
         try:
             user = UserAccount.objects.get(email=email)
             if not user.check_password(password):
-                return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response(
+                    {"detail": "Invalid credentials"},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
         except UserAccount.DoesNotExist:
-            return Response({"detail": "User not found"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"detail": "User not found"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
+        # Generate tokens
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
 
-        response = Response({"detail": "Login successful"}, status=status.HTTP_200_OK)
-        
-        # Store tokens in cookies
-        set_auth_cookie(response, access_token, str(refresh))
+        response = Response(
+            {
+                "detail": "Login successful",
+                "access_token": access_token,
+                "refresh_token": refresh_token
+            },
+            status=status.HTTP_200_OK
+        )
+
+        # Set HTTP-only cookies for access & refresh tokens
+        self.set_auth_cookie(response, "access_token", access_token)
+        self.set_auth_cookie(response, "refresh_token", refresh_token, refresh=True)
 
         return response
+
+    def set_auth_cookie(self, response, key, token, refresh=False):
+        """Helper function to set secure HTTP-only cookies"""
+        response.set_cookie(
+            key=key,
+            value=token,
+            httponly=True,  # Prevents JavaScript access (better security)
+            secure=settings.DEBUG is False,  # Set True in production (HTTPS required)
+            samesite="Lax",  # Prevents CSRF attacks
+            path="/",  # Available across the whole site
+            max_age=7 * 24 * 60 * 60 if refresh else 15 * 60,  # Refresh token lasts 7 days, access token 15 mins
+        )
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]

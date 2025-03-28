@@ -57,3 +57,4 @@ class AdminFeedbackView(generics.ListAPIView):
             return Feedback.objects.filter(location=user.address)
         else:
             return Feedback.objects.none()  # Return empty queryset if not admin
+

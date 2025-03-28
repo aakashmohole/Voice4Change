@@ -38,6 +38,8 @@ urlpatterns = [
     # Feedback endpoints
     path('api/feedback/', include('feedback.urls')),
     
+    path('api/vote/', include('votes.urls')),
+    
     
     # endpoint documentation
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
