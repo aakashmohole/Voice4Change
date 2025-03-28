@@ -137,18 +137,22 @@ class FeedbackDeleteView(generics.DestroyAPIView):
 
 class AdminFeedbackView(generics.ListAPIView):
     serializer_class = FeedbackSerializer
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [JWTAuthentication]  # If using Authorization header
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user  # Get logged-in user
 
+        print(f"User Role: {user.role}")
+        print(f"User Address: {user.address}")
+        print(f"Feedback Locations: {Feedback.objects.values_list('location', flat=True)}")
+
         # Ensure the user is an admin
-        if user.role == 'Authority':
-            return Feedback.objects.filter(location=user.address)
+        if user.role == 'ADMIN':
+            return Feedback.objects.filter(location=user.address.lower())  # Case-insensitive & partial match
         else:
             return Feedback.objects.none()  # Return empty queryset if not admin
-        
+
 class UserFeedbackView(generics.ListAPIView):
     serializer_class = FeedbackSerializer
     authentication_classes = [JWTAuthentication]
