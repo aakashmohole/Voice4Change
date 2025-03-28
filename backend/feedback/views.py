@@ -126,3 +126,17 @@ class AdminFeedbackView(generics.ListAPIView):
             return Feedback.objects.filter(location=user.address)
         else:
             return Feedback.objects.none()  # Return empty queryset if not admin
+        
+class UserFeedbackView(generics.ListAPIView):
+    serializer_class = FeedbackSerializer
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user  # Get logged-in user
+
+        # if user.role == 'Authority':  # If the user is an admin
+        #     return Feedback.objects.filter(location=user.address)
+        
+        # If not admin, return only the feedback created by the logged-in user
+        return Feedback.objects.filter(user=user)
