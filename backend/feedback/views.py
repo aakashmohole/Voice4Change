@@ -3,10 +3,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Feedback
 from .serializers import FeedbackSerializer, FeedbackUpdateSerializer
 from .filters import FeedbackFilter
+from django.conf import settings 
 from authentication.utils import CookieJWTAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from googletrans import Translator
+import google.generativeai as genai
 
+# Configure Gemini API
+genai.configure(api_key=settings.GEMINI_API_KEY)
 
 
 class FeedbackCreateView(generics.CreateAPIView):
@@ -16,8 +20,27 @@ class FeedbackCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        # serializer.save(user=self.request.user)
+        feedback = serializer.validated_data
+        description = feedback.get("description")
+        
+        # Get sentiment score from Gemini API
+        sentiment_score = self.get_sentiment_score(description)
 
+        # Save feedback with sentiment score
+        serializer.save(user=self.request.user, sentiment_score=sentiment_score)
+        
+    def get_sentiment_score(self, text):
+        """Analyze sentiment score using Gemini API"""
+        try:
+            response = genai.generate_text(
+                model="gemini-pro",
+                prompt=f"Analyze the sentiment score (-1 to 1) of this text: {text}"
+            )
+            return float(response.text.strip())  # Convert API response to float
+        except Exception as e:
+            return 0.0  # Default score if API fails
+        
 class FeedbackListView(generics.ListAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
