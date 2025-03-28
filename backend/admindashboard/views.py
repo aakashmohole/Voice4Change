@@ -41,7 +41,7 @@ class AdminDashboardView(APIView):
         })
 
 class AssignFeedbackView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     authentication_classes = [CookieJWTAuthentication]
     def post(self, request, feedback_id):
         try:
@@ -58,7 +58,7 @@ class AssignFeedbackView(APIView):
             return Response({"error": "Feedback not found"}, status=404)
 
 class ExportFeedbackView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     authentication_classes = [CookieJWTAuthentication]
     
     
