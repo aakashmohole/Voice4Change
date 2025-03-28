@@ -113,11 +113,11 @@ class LoginView(APIView):
         
          # Prepare user data for response
         user_data = {
-            "id": user.id,
+
             "name": user.first_name,
             "name": user.last_name,
             "email": user.email,
-            "phone_number": user.phone_number,
+            "phone_number": user.phone,
             "address": user.address,
             "user_type": user.role
         }
