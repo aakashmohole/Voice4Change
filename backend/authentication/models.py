@@ -21,8 +21,8 @@ class UserAccountManager(BaseUserManager):
 
 class UserAccount(AbstractBaseUser, PermissionsMixin):  # ✅ Extend AbstractBaseUser
     class Role(models.TextChoices):
-        CIVILIAN = 'CIVILIAN', 'Civilian'
-        ADMIN = 'ADMIN', 'Village Authority Admin'
+        CIVILIAN = 'Civilian', 'Civilian'
+        ADMIN = 'Authority', 'Authority'
 
     class DocumentType(models.TextChoices):
         AADHAAR = 'AADHAAR', 'Aadhaar Card'
