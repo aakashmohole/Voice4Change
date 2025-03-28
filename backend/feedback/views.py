@@ -54,6 +54,6 @@ class AdminFeedbackView(generics.ListAPIView):
 
         # Ensure the user is an admin
         if user.role == 'ADMIN':
-            return Feedback.objects.filter(location=user.location)
+            return Feedback.objects.filter(location=user.address)
         else:
             return Feedback.objects.none()  # Return empty queryset if not admin
