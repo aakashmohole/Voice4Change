@@ -44,7 +44,7 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):  # ✅ Extend AbstractBas
     is_active = models.BooleanField(default=True)  # ✅ Users should be active by default
     is_staff = models.BooleanField(default=False)  # ✅ Required for admin access
 
-    # Document fields
+    # Document fields   
     id_proof_type = models.CharField(max_length=20, choices=DocumentType.choices, blank=True)
     id_proof_file = CloudinaryField('id_proofs', folder='authentication/id_proofs', blank=True)
 
