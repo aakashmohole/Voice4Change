@@ -6,11 +6,13 @@ from django.db.models import Count
 from feedback.models import Feedback
 from authentication.utils import CookieJWTAuthentication
 from django.http import HttpResponse
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 import csv
 
 class AdminDashboardView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request):
         today = now()
