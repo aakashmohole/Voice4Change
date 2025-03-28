@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     # app modules
     'authentication',
     'feedback',
+    'votes',
     
     
     # third party     
