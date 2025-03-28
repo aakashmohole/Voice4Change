@@ -14,6 +14,9 @@ from rest_framework.exceptions import PermissionDenied
 from datetime import timedelta  # For time-based filtering
 from difflib import SequenceMatcher  # For checking text similarity
 from django.utils.timezone import now  # To get the current timestamp
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import FeedbackFilter  # Ensure this exists
 
 
 
@@ -139,6 +142,10 @@ class AdminFeedbackView(generics.ListAPIView):
     serializer_class = FeedbackSerializer
     authentication_classes = [JWTAuthentication]  # If using Authorization header
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = FeedbackFilter  # Apply the same filters
+    search_fields = ['title', 'description', 'category', 'location']
+    ordering_fields = ['created_at', 'upvotes', 'urgency']
 
     def get_queryset(self):
         user = self.request.user  # Get logged-in user
@@ -149,7 +156,7 @@ class AdminFeedbackView(generics.ListAPIView):
 
         # Ensure the user is an admin
         if user.role == 'ADMIN':
-            return Feedback.objects.filter(location=user.address.lower())  # Case-insensitive & partial match
+            return Feedback.objects.filter(location__iexact=user.address)  # Case-insensitive match
         else:
             return Feedback.objects.none()  # Return empty queryset if not admin
 
