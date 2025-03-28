@@ -149,7 +149,7 @@ class LoginView(APIView):
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [JWTAuthentication]
     def post(self, request):
         # Get the refresh token from cookies
         refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])

@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from feedback.models import Feedback
 from .models import  Upvote, Downvote
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from .serializers import UpvoteSerializer, DownvoteSerializer
 from authentication.utils import CookieJWTAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -15,7 +17,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 class UpvoteFeedbackView(generics.CreateAPIView):
     serializer_class = UpvoteSerializer
     permission_classes = [IsAuthenticated]
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     def post(self, request, feedback_id):
         feedback = Feedback.objects.get(id=feedback_id)
@@ -42,7 +44,7 @@ class TrendingFeedbackView(generics.ListAPIView):
 class DownvoteFeedbackView(generics.CreateAPIView):
     serializer_class = DownvoteSerializer
     permission_classes = [IsAuthenticated]
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     def post(self, request, feedback_id):
         feedback = Feedback.objects.get(id=feedback_id)

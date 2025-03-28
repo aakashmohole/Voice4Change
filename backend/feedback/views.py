@@ -23,7 +23,7 @@ genai.configure(api_key=settings.GEMINI_API_KEY)
 class FeedbackCreateView(generics.CreateAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
@@ -123,7 +123,7 @@ class FeedbackUpdateView(generics.UpdateAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackUpdateSerializer
     permission_classes = [IsAuthenticated]
-    authentication_classes = [CookieJWTAuthentication] 
+    authentication_classes = [JWTAuthentication] 
 
     def get_queryset(self):
         return Feedback.objects.filter(user=self.request.user)
@@ -131,13 +131,13 @@ class FeedbackUpdateView(generics.UpdateAPIView):
 class FeedbackDeleteView(generics.DestroyAPIView):
     queryset = Feedback.objects.all()
     permission_classes = [IsAuthenticated]
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [JWTAuthentication]
     def get_queryset(self):
         return Feedback.objects.filter(user=self.request.user)
 
 class AdminFeedbackView(generics.ListAPIView):
     serializer_class = FeedbackSerializer
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
