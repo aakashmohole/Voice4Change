@@ -110,11 +110,22 @@ class LoginView(APIView):
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
+        
+         # Prepare user data for response
+        user_data = {
+            "id": user.id,
+            "name": user.first_name,
+            "name": user.last_name,
+            "email": user.email,
+            "phone_number": user.phone_number,
+            "address": user.address,
+            "user_type": user.role
+        }
 
         response = Response(
             {
                 "detail": "Login successful",
-                "user_data" :user,
+                "user": user_data,
                 "access_token": access_token,
                 "refresh_token": refresh_token
             },
