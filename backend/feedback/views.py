@@ -4,6 +4,7 @@ from .models import Feedback
 from .serializers import FeedbackSerializer, FeedbackUpdateSerializer
 from .filters import FeedbackFilter
 from django.conf import settings 
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from authentication.utils import CookieJWTAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from googletrans import Translator
@@ -150,7 +151,7 @@ class AdminFeedbackView(generics.ListAPIView):
         
 class UserFeedbackView(generics.ListAPIView):
     serializer_class = FeedbackSerializer
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
