@@ -58,7 +58,7 @@ class AdminDashboardView(APIView):
 
 class AssignFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [JWTAuthentication]
     def post(self, request, feedback_id):
         try:
             feedback = Feedback.objects.get(id=feedback_id)
@@ -75,7 +75,7 @@ class AssignFeedbackView(APIView):
 
 class ExportFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [JWTAuthentication]
     
     
     def get(self, request):

@@ -122,14 +122,25 @@ class FeedbackDetailView(generics.RetrieveAPIView):
 
         return response
     
+from rest_framework.response import Response
+from rest_framework import generics, permissions
+from feedback.models import Feedback
+from feedback.serializers import FeedbackUpdateSerializer
+from authentication.utils import JWTAuthentication
+
 class FeedbackUpdateView(generics.UpdateAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackUpdateSerializer
     permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication] 
+    authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
         return Feedback.objects.filter(user=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        return Response({"message": "Feedback updated successfully", "status": response.data.get("status")})
+
 
 class FeedbackDeleteView(generics.DestroyAPIView):
     queryset = Feedback.objects.all()
