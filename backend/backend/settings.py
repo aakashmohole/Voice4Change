@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     'feedback',
     'votes',
     'admindashboard', 
+    'ai_insights',
     
     # third party     
     'rest_framework',
