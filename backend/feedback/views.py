@@ -10,6 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from googletrans import Translator
 import google.generativeai as genai
 import re
+from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from datetime import timedelta  # For time-based filtering
 from difflib import SequenceMatcher  # For checking text similarity
@@ -122,11 +123,6 @@ class FeedbackDetailView(generics.RetrieveAPIView):
 
         return response
     
-from rest_framework.response import Response
-from rest_framework import generics, permissions
-from feedback.models import Feedback
-from feedback.serializers import FeedbackUpdateSerializer
-from authentication.utils import JWTAuthentication
 
 class FeedbackUpdateView(generics.UpdateAPIView):
     queryset = Feedback.objects.all()
