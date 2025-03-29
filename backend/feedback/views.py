@@ -138,6 +138,39 @@ class FeedbackDeleteView(generics.DestroyAPIView):
     def get_queryset(self):
         return Feedback.objects.filter(user=self.request.user)
 
+
+class UserFeedbackView(generics.ListAPIView):
+    serializer_class = FeedbackSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user  # Get logged-in user
+        return Feedback.objects.filter(user=user)  # Return only the logged-in user's feedback
+
+# class AdminFeedbackView(generics.ListAPIView):
+#     serializer_class = FeedbackSerializer
+#     authentication_classes = [JWTAuthentication]  # If using Authorization header
+#     permission_classes = [IsAuthenticated]
+#     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+#     filterset_class = FeedbackFilter  # Apply the same filters
+#     search_fields = ['title', 'description', 'category', 'location']
+#     ordering_fields = ['created_at', 'upvotes', 'urgency']
+
+#     def get_queryset(self):
+#         user = self.request.user  # Get logged-in user
+
+#         print(f"User Role: {user.role}")
+#         print(f"User Address: {user.address}")
+#         print(f"Feedback Locations: {Feedback.objects.values_list('location', flat=True)}")
+
+#         # Ensure the user is an admin
+#         if user.role == 'ADMIN':
+#             return Feedback.objects.filter(location__iexact=user.address)  # Case-insensitive match
+#         else:
+#             return Feedback.objects.none()  # Return empty queryset if not admin
+
+
 class AdminFeedbackView(generics.ListAPIView):
     serializer_class = FeedbackSerializer
     authentication_classes = [JWTAuthentication]  # If using Authorization header
@@ -156,7 +189,7 @@ class AdminFeedbackView(generics.ListAPIView):
 
         # Ensure the user is an admin
         if user.role == 'ADMIN':
-            return Feedback.objects.filter(location__iexact=user.address)  # Case-insensitive match
+            return Feedback.objects.filter(location__iexact=user.address).select_related('user')  # Optimize query
         else:
             return Feedback.objects.none()  # Return empty queryset if not admin
 
