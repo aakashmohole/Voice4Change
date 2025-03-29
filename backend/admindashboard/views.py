@@ -16,7 +16,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.utils.timezone import now
 from datetime import timedelta
 from django.db.models import Count
-from .models import Feedback
+from feedback.models import Feedback
 
 class AdminDashboardView(APIView):
     permission_classes = [IsAuthenticated]
