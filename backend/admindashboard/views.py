@@ -9,6 +9,14 @@ from django.http import HttpResponse
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 import csv
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.utils.timezone import now
+from datetime import timedelta
+from django.db.models import Count
+from .models import Feedback
 
 class AdminDashboardView(APIView):
     permission_classes = [IsAuthenticated]
@@ -16,8 +24,12 @@ class AdminDashboardView(APIView):
 
     def get(self, request):
         today = now()
+
         total_feedback = Feedback.objects.count()
         resolved_feedback = Feedback.objects.filter(status="resolved").count()
+        pending_feedback = Feedback.objects.filter(status="pending").count()
+        in_progress_feedback = Feedback.objects.filter(status="in-progress").count()
+
         category_stats = Feedback.objects.values("category").annotate(total=Count("id"))
 
         last_7_days = Feedback.objects.filter(created_at__gte=today - timedelta(days=7)).count()
@@ -27,12 +39,14 @@ class AdminDashboardView(APIView):
         top_priority_issues = (
             Feedback.objects.filter(urgency__gte=7)
             .values("category", "title", "urgency")
-            .order_by("urgency")[:5]
+            .order_by("-urgency")[:5]  # Sort by urgency (high to low)
         )
 
         return Response({
             "total_feedback": total_feedback,
             "resolved_feedback": resolved_feedback,
+            "pending_feedback": pending_feedback,
+            "in_progress_feedback": in_progress_feedback,
             "category_stats": category_stats,
             "feedback_trends": {
                 "last_7_days": last_7_days,
